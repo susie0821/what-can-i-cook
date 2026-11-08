@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What Can I Cook?</title>
+    <meta name="description" content="Find dishes you can cook with the ingredients you have." />
+    <meta name="theme-color" content="#8a2d1f" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Cook" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <button type="button" id="profile-button" class="profile-button" aria-label="Open my profile: favorites and history"></button>
+    <dialog id="profile-dialog" class="profile-panel" aria-labelledby="profile-title">
+      <div class="profile-view">
+        <button type="button" id="profile-close" class="close-button" aria-label="Close my profile">✕</button>
+        <h2 id="profile-title">My profile</h2>
+        <section>
+          <h3>♥ My favorites</h3>
+          <div id="profile-favorites"></div>
+        </section>
+        <section>
+          <h3>🕘 History</h3>
+          <p class="profile-note">Recipes you've made, newest first.</p>
+          <div id="profile-history"></div>
+        </section>
+      </div>
+    </dialog>
+    <header class="site-header">
+      <h1>What Can I Cook?</h1>
+      <p class="subtitle">Tell me what's in your kitchen, and I'll search hundreds of dishes from around the world that you can make.</p>
+      <p id="home-line" class="home-line"></p>
+      <p id="diet-line" class="home-line diet-line"></p>
+      <button type="button" id="install-button" class="install-button" hidden>⬇ Install app</button>
+      <p id="install-hint" class="install-hint" hidden></p>
+    </header>
+
+    <main>
+      <section class="pantry" aria-labelledby="pantry-heading">
+        <h2 id="pantry-heading">Your ingredients</h2>
+        <button type="button" id="fridge-button" class="fridge-button">What's in My Fridge? <span class="fridge-button-note">Snap a photo and tick what you have</span></button>
+        <button type="button" id="receipt-button" class="fridge-button">🧾 Scan a Receipt <span class="fridge-button-note">Cook with what you just bought</span></button>
+        <div class="search-mode" role="group" aria-label="Search by">
+          <button type="button" class="mode-tab" data-mode="ingredients" aria-pressed="true">By ingredients</button>
+          <button type="button" class="mode-tab" data-mode="name" aria-pressed="false">By dish name</button>
+        </div>
+        <form id="ingredient-form" class="ingredient-form" autocomplete="off">
+          <label id="ingredient-label" for="ingredient-input" class="visually-hidden">Add an ingredient</label>
+          <input
+            id="ingredient-input"
+            list="ingredient-suggestions"
+            placeholder="Any ingredient, e.g. salmon"
+          />
+          <datalist id="ingredient-suggestions"></datalist>
+          <button type="submit" id="search-button">Add</button>
+        </form>
+        <p id="input-message" class="input-message" role="status"></p>
+
+        <div class="quick-picks">
+          <span class="quick-label">Quick add:</span>
+          <div id="quick-picks" class="chip-row"></div>
+        </div>
+
+        <div id="have-list" class="chip-row have-list" aria-live="polite"></div>
+        <p class="staples-note">Salt, sugar, cooking oil, water, and pepper are assumed. You don't need to add them.</p>
+      </section>
+
+      <section aria-labelledby="results-heading">
+        <h2 id="results-heading">Dishes you can make</h2>
+        <div id="meal-tabs" class="meal-tabs" role="group" aria-label="Show dishes for"></div>
+        <div id="results"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      Online recipes and photos from <a href="https://www.themealdb.com" target="_blank" rel="noopener">TheMealDB</a> and <a href="https://dummyjson.com/docs/recipes" target="_blank" rel="noopener">DummyJSON</a>.
+    </footer>
+
+    <dialog id="diet-dialog" class="fridge-dialog" aria-labelledby="diet-title">
+      <form id="diet-form" class="fridge">
+        <h2 id="diet-title">Dietary needs</h2>
+        <p class="welcome-note">Tick anything you don't eat or are allergic to, and dishes with it are hidden from your results.</p>
+        <div id="diet-options" class="fridge-checklist"></div>
+        <p class="diet-caution">This is based on ingredient names, so it can miss hidden ingredients. Always check labels, especially for allergies.</p>
+        <div class="welcome-actions">
+          <button type="submit" class="primary-button">Save</button>
+          <button type="button" id="diet-cancel" class="link-button">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="fridge-dialog" class="fridge-dialog" aria-labelledby="fridge-title">
+      <form id="fridge-form" class="fridge">
+        <h2 id="fridge-title">What's in My Fridge?</h2>
+        <p class="welcome-note">Take a photo of your fridge, then tick everything you can see in it. The photo stays on this device.</p>
+        <input id="fridge-photo" type="file" accept="image/*" class="visually-hidden" />
+        <label for="fridge-photo" class="photo-picker">Take or choose a photo</label>
+        <img id="fridge-preview" class="fridge-preview" alt="Your fridge photo" hidden />
+        <div id="fridge-checklist" class="fridge-checklist"></div>
+        <p id="fridge-message" class="home-message" role="status"></p>
+        <div class="welcome-actions">
+          <button type="submit" id="fridge-add" class="primary-button">Add selected</button>
+          <button type="button" id="fridge-cancel" class="link-button">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="receipt-dialog" class="fridge-dialog" aria-labelledby="receipt-title">
+      <form id="receipt-form" class="fridge">
+        <h2 id="receipt-title">Scan a Receipt</h2>
+        <p class="welcome-note">Take a photo of your supermarket receipt, flat and well lit, and see what you can cook with what you bought. It's read on this device; the photo isn't uploaded.</p>
+        <input id="receipt-photo" type="file" accept="image/*" class="visually-hidden" />
+        <label for="receipt-photo" class="photo-picker">Take or choose a photo</label>
+        <img id="receipt-preview" class="fridge-preview" alt="Your receipt photo" hidden />
+        <p id="receipt-status" class="home-message is-success" role="status"></p>
+        <div id="receipt-checklist" class="fridge-checklist"></div>
+        <div class="welcome-actions">
+          <button type="submit" id="receipt-find" class="primary-button" disabled>Find dishes</button>
+          <button type="button" id="receipt-cancel" class="link-button">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="receipt-results-dialog" aria-label="Dishes from your shopping">
+      <div id="receipt-results-view" class="receipt-results"></div>
+    </dialog>
+
+    <dialog id="welcome-dialog" class="welcome-dialog" aria-labelledby="welcome-title">
+      <form id="welcome-form" class="welcome">
+        <h2 id="welcome-title">Welcome! Where are you from?</h2>
+        <p class="welcome-note">We'll show dishes from your home country first, and suggest something new from the rest of the world.</p>
+        <label for="home-search" class="welcome-label">Your nationality</label>
+        <input id="home-search" type="search" placeholder="Type to search, e.g. Chinese" autocomplete="off" aria-controls="home-options" />
+        <div id="home-options" class="home-options" role="group" aria-label="Matching nationalities"></div>
+        <p id="home-message" class="home-message" role="status"></p>
+        <div class="welcome-actions">
+          <button type="submit" class="primary-button">Continue</button>
+          <button type="button" id="welcome-skip" class="link-button">Skip for now</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="recipe-dialog" aria-labelledby="dialog-title">
+      <div id="recipe-detail"></div>
+    </dialog>
+
+    <dialog id="cooking-dialog" class="cooking-dialog" aria-labelledby="cooking-title">
+      <div id="cooking-view"></div>
+      <div id="cooking-timer" class="cooking-timer" role="status" hidden></div>
+    </dialog>
+
+    <script src="data.js"></script>
+    <script src="matching.js"></script>
+    <script src="calories.js"></script>
+    <script src="mealdb.js"></script>
+    <script src="dummyjson.js"></script>
+    <script src="stories.js"></script>
+    <script src="app.js"></script>
+    <script src="cooking.js"></script>
+    <script src="receipt.js"></script>
+    <script src="pixel-rain.js"></script>
+    <script src="install.js"></script>
+  </body>
+</html>
